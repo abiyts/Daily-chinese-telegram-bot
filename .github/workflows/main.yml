@@ -1,0 +1,58 @@
+name: Daily Chinese Lesson
+
+on:
+  schedule:
+    - cron: "30 12 * * *"
+  workflow_dispatch:
+
+jobs:
+  send-lesson:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Chinese lesson
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import os
+          import requests
+
+          token = os.environ["TELEGRAM_BOT_TOKEN"]
+          chat_id = "330492497"
+
+          message = """🇨🇳 DAILY CHINESE LESSON
+
+因为 — yīnwèi — because
+所以 — suǒyǐ — so
+但是 — dànshì — but
+或者 — huòzhě — or
+如果 — rúguǒ — if
+就 — jiù — then
+必须 — bìxū — must
+应该 — yīnggāi — should
+需要 — xūyào — need to
+可以 — kěyǐ — can
+
+🏗️ Construction Example:
+因为材料还没到，所以不能开始。
+Because the material hasn't arrived, we cannot start.
+
+📝 Practice:
+Translate:
+“We must finish today.”
+
+加油！💪🇨🇳"""
+
+          url = f"https://api.telegram.org/bot{token}/sendMessage"
+
+          response = requests.post(
+              url,
+              data={
+                  "chat_id": chat_id,
+                  "text": message
+              }
+          )
+
+          print(response.text)
+          PY
