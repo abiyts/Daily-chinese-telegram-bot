@@ -2,67 +2,190 @@ name: Daily Chinese Lesson
 
 on:
   schedule:
-    - cron: "30 12 * * *"
+    # 12:10 PM Ethiopia time (UTC+3) = 09:10 UTC
+    - cron: "10 9 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   send-lesson:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Send Chinese lesson
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Send daily Chinese lesson
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          MESSAGE: |
-            🇨🇳 DAILY CHINESE LESSON
-
-            1. 因为 — yīnwèi — because
-            🏗️ 因为下雨，所以不能浇筑混凝土。
-            Because it's raining, we can't cast concrete.
-
-            2. 所以 — suǒyǐ — so / therefore
-            🏗️ 材料还没到，所以不能开始。
-            The materials haven't arrived, so we can't start.
-
-            3. 但是 — dànshì — but
-            🏗️ 我想开始，但是材料不够。
-            I want to start, but there aren't enough materials.
-
-            4. 或者 — huòzhě — or
-            🏗️ 今天或者明天浇筑混凝土。
-            Cast the concrete today or tomorrow.
-
-            5. 如果 — rúguǒ — if
-            🏗️ 如果材料到了，就通知我。
-            If the materials arrive, inform me.
-
-            6. 就 — jiù — then
-            🏗️ 材料到了，就开始工作。
-            When the materials arrive, we'll start.
-
-            7. 必须 — bìxū — must
-            🏗️ 今天必须完成。
-            It must be completed today.
-
-            8. 应该 — yīnggāi — should
-            🏗️ 你应该先检查钢筋。
-            You should check the rebar first.
-
-            9. 需要 — xūyào — need to
-            🏗️ 我们需要更多钢筋。
-            We need more rebar.
-
-            10. 可以 — kěyǐ — can
-            🏗️ 现在可以浇筑混凝土。
-            We can cast concrete now.
-
-            📝 Practice:
-            Translate:
-            “We must finish today.”
-
-            加油！💪🇨🇳
-
         run: |
-          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            --data-urlencode "chat_id=330492497" \
-            --data-urlencode "text=${MESSAGE}"
+          python3 <<'PY'
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+          from pathlib import Path
+
+          lessons = {
+
+            11: """🇨🇳 DAY 11 — CONSTRUCTION CHINESE
+
+          1. 检查 — jiǎnchá — check / inspect
+          🏗️ 请先检查钢筋。
+          Please check the rebar first.
+
+          2. 确认 — quèrèn — confirm
+          🏗️ 请确认尺寸。
+          Please confirm the dimensions.
+
+          3. 准备 — zhǔnbèi — prepare
+          🏗️ 准备浇筑混凝土。
+          Prepare for concrete casting.
+
+          4. 安排 — ānpái — arrange
+          🏗️ 我来安排工人。
+          I'll arrange the workers.
+
+          5. 及时 — jíshí — promptly / in time
+          🏗️ 材料到了，请及时通知我。
+          When the materials arrive, inform me promptly.
+
+          6. 尺寸 — chǐcùn — dimension / size
+          🏗️ 这个尺寸不对。
+          This dimension is not correct.
+
+          7. 高度 — gāodù — height
+          🏗️ 请检查梁的高度。
+          Please check the beam height.
+
+          8. 长度 — chángdù — length
+          🏗️ 这个长度是多少？
+          What is the length?
+
+          9. 位置 — wèizhi — position / location
+          🏗️ 钢筋的位置不对。
+          The position of the rebar is not correct.
+
+          10. 完成 — wánchéng — complete / finish
+          🏗️ 今天必须完成。
+          It must be completed today.
+
+          📝 PRACTICE:
+          Translate:
+          “Please check the rebar position before casting concrete.”
+
+          加油！💪🇨🇳
+          """,
+
+            12: """🇨🇳 DAY 12 — CONSTRUCTION CHINESE
+
+          1. 浇筑 — jiāozhù — cast / pour concrete
+          🏗️ 今天浇筑混凝土。
+          We are casting concrete today.
+
+          2. 振捣 — zhèndǎo — vibrate / compact concrete
+          🏗️ 浇筑时要振捣。
+          The concrete must be vibrated during casting.
+
+          3. 模板 — múbǎn — formwork
+          🏗️ 模板已经安装好了。
+          The formwork has been installed.
+
+          4. 拆除 — chāichú — remove / dismantle
+          🏗️ 明天可以拆除模板。
+          We can remove the formwork tomorrow.
+
+          5. 钢筋 — gāngjīn — rebar
+          🏗️ 钢筋已经绑扎好了。
+          The rebar has been tied.
+
+          6. 混凝土 — hùnníngtǔ — concrete
+          🏗️ 混凝土什么时候到？
+          When will the concrete arrive?
+
+          7. 厚度 — hòudù — thickness
+          🏗️ 请检查板的厚度。
+          Please check the slab thickness.
+
+          8. 间距 — jiānjù — spacing
+          🏗️ 钢筋间距是多少？
+          What is the rebar spacing?
+
+          9. 保护层 — bǎohùcéng — concrete cover
+          🏗️ 请检查保护层厚度。
+          Please check the concrete cover thickness.
+
+          10. 现场 — xiànchǎng — construction site
+          🏗️ 我现在在现场。
+          I am at the site now.
+
+          📝 PRACTICE:
+          Translate:
+          “Please check the rebar spacing and concrete cover.”
+
+          加油！💪🇨🇳
+          """
+          }
+
+          state_file = Path("lesson_day.txt")
+
+          try:
+              day = int(state_file.read_text().strip())
+          except Exception:
+              day = 11
+
+          if day < 11:
+              day = 11
+
+          message = lessons.get(day)
+
+          if message is None:
+              message = f"""🇨🇳 DAY {day} — CONSTRUCTION CHINESE
+
+          Today's lesson is being prepared. 🏗️🇨🇳
+
+          We are continuing from Day 10 with
+          construction-site Chinese.
+
+          Chinese + Pinyin + English + practical site sentences.
+
+          📝 Practice:
+          Review your previous lessons today.
+
+          加油！💪🇨🇳
+          """
+
+          token = os.environ["TELEGRAM_BOT_TOKEN"]
+          chat_id = "330492497"
+
+          url = f"https://api.telegram.org/bot{token}/sendMessage"
+
+          data = urllib.parse.urlencode({
+              "chat_id": chat_id,
+              "text": message
+          }).encode()
+
+          with urllib.request.urlopen(url, data=data) as response:
+              result = json.loads(response.read().decode())
+
+              if not result.get("ok"):
+                  raise SystemExit(f"Telegram error: {result}")
+
+          # Move to the next lesson only after successful delivery
+          state_file.write_text(str(day + 1) + "\n")
+
+          PY
+
+      - name: Save next lesson number
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add lesson_day.txt
+
+          git diff --cached --quiet && exit 0
+
+          git commit -m "Advance Chinese lesson to next day"
+          git push
